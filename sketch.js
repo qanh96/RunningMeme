@@ -13,7 +13,6 @@
 //   ellipse(mouseX, mouseY, 80, 80);
 // }
 
-
 /* jslint esversion: 9 */
 
 import Bird from './lib/actors/Bird.js';
@@ -22,8 +21,6 @@ import Cloud from './lib/actors/Cloud.js';
 import config from './lib/config.js';
 import Dino from './lib/actors/Dino.js';
 import { randBoolean } from './lib/utils.js';
-// import 'https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.6.1/p5.min.js';
-import './p5.min.js';
 
 const { p5: P5 } = window;
 window.config = config;
@@ -51,6 +48,17 @@ new P5(p5 => {
   // global references for debugging
   window.p5 = p5;
   window.state = STATE;
+
+  // checkbox for slecting mode
+  let micInputCheckbox = null;
+  // boolean var to flag Mode
+  let enableMicInput = false;
+  // pointer to AudioInput (Microphone)
+  let mic = null;
+  // var number to store timestamp(EPOCH milis)
+  let ts = 0;
+  // min Interval in Ms between Jump(for double jump with sound control)
+  let minInterval = 100;
 
   function spriteImage (spriteName, ...clientCoords) {
     const { h, w, x, y } = config.sprites[spriteName];
@@ -226,6 +234,29 @@ new P5(p5 => {
     }
   }
 
+  function toogleMicInput() {
+    if (micInputCheckbox.checked()) {
+      console.log('enable Mic Input!');
+      enableMicInput = true;
+    } else {
+      console.log('disable Mic Input!');
+      enableMicInput = false;
+    }
+  }
+
+  function soundControl() {
+     // Get the overall volume (between 0 and 1.0)
+    let vol = mic.getLevel(); 
+    if(enableMicInput && mic != null) {
+      // Calculate interval between jump to enable double jump (TODO: still need to optimize!!!)
+      let intervalBtwJumps = Date.now() - ts;
+      if (vol > 0.05 && STATE.isRunning && intervalBtwJumps > 100) {
+        STATE.dino.doubleJump();
+        ts = Date.now(); 
+      }
+    }
+  }
+
   // triggered on pageload
   p5.preload = () => {
     PressStartFont = p5.loadFont('assets/PressStart2P-Regular.ttf');
@@ -234,6 +265,17 @@ new P5(p5 => {
 
   // triggered after preload
   p5.setup = () => {
+    // Create checkbox
+    micInputCheckbox = p5.createCheckbox('Enable Mic Input (with double jump)', false);
+    micInputCheckbox.changed(toogleMicInput);
+
+    // Create an Audio input
+    mic = new P5.AudioIn();
+    // start the Audio Input.
+    // By default, it does not .connect() (to the computer speakers)
+    mic.start();
+    ts = Date.now();
+
     const canvas = p5.createCanvas(600, 150);
 
     STATE.groundY = p5.height - config.sprites.ground.h / 2;
@@ -268,6 +310,8 @@ new P5(p5 => {
     } else {
       updateScore();
     }
+
+    soundControl();
   };
 
   p5.keyPressed = () => {
@@ -290,3 +334,4 @@ new P5(p5 => {
     }
   };
 });
+
