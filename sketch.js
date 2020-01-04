@@ -59,6 +59,12 @@ new P5(p5 => {
   let ts = 0;
   // min Interval in Ms between Jump(for double jump with sound control)
   let minInterval = 100;
+  // Slider to control the Threshold
+  let slider;
+  // sound when Jump
+  let jumpSound = null;
+  // sound for GameOver
+  let gameOverSound = null;
 
   function spriteImage (spriteName, ...clientCoords) {
     const { h, w, x, y } = config.sprites[spriteName];
@@ -80,6 +86,10 @@ new P5(p5 => {
 
     Object.assign(config.settings, SETTINGS_BACKUP);
     p5.loop();
+
+    if(gameOverSound.isPlaying()){
+      gameOverSound.stop();
+    }
   }
 
   function endGame () {
@@ -203,6 +213,8 @@ new P5(p5 => {
   }
 
   function drawScore () {
+    p5.strokeWeight(0);
+    p5.stroke(51);
     p5.fill('#535353');
     p5.textAlign(p5.RIGHT);
     p5.textFont(PressStartFont);
@@ -244,14 +256,33 @@ new P5(p5 => {
     }
   }
 
+  function drawVolume(){
+    let vol = mic.getLevel();
+    p5.strokeWeight(3);
+    p5.stroke(vol*255, 255-vol*255, 0);
+    p5.line(0, 5, (0 + 100*vol), 5 );
+  }
+
+  function playJumpSound(){
+    if (jumpSound.isPlaying()) {
+      // .isPlaying() returns a boolean
+      jumpSound.stop();
+      jumpSound.play();
+    } else {
+      jumpSound.play();
+    }
+  }
+
   function soundControl() {
      // Get the overall volume (between 0 and 1.0)
-    let vol = mic.getLevel(); 
+    let vol = mic.getLevel();
+    let threshold = slider.value() / 100; 
     if(enableMicInput && mic != null) {
       // Calculate interval between jump to enable double jump (TODO: still need to optimize!!!)
       let intervalBtwJumps = Date.now() - ts;
-      if (vol > 0.05 && STATE.isRunning && intervalBtwJumps > 100) {
+      if (vol > threshold && STATE.isRunning && intervalBtwJumps > 100) {
         STATE.dino.doubleJump();
+        playJumpSound();
         ts = Date.now(); 
       }
     }
@@ -268,8 +299,15 @@ new P5(p5 => {
     // Create checkbox
     micInputCheckbox = p5.createCheckbox('Enable Mic Input (with double jump)', false);
     micInputCheckbox.changed(toogleMicInput);
+    // Create jumpSound + gameOverSound
+    jumpSound = p5.loadSound('./lib/sound/maro-jump-sound-effect_1.mp3');
+    gameOverSound = p5.loadSound('./lib/sound/sega-rally-15-game-over-yeah1.mp3');
+    //jumpSound.volume(0.5);
 
-    // Create an Audio input
+    // Create Slider for Threshold
+    slider = p5.createSlider(0, 100, 10, 1);
+    slider.style('width','100px');
+    //Create an Audio input
     mic = new P5.AudioIn();
     // start the Audio Input.
     // By default, it does not .connect() (to the computer speakers)
@@ -291,11 +329,13 @@ new P5(p5 => {
   // triggered for every frame
   p5.draw = () => {
     p5.background('#f7f7f7');
+    drawVolume();
     drawGround();
     drawClouds();
     drawDino();
     drawCacti();
     drawScore();
+
 
     if (STATE.level > 3) {
       drawBirds();
@@ -307,6 +347,7 @@ new P5(p5 => {
 
     if (STATE.gameOver) {
       endGame();
+      gameOverSound.play();
     } else {
       updateScore();
     }
@@ -318,6 +359,7 @@ new P5(p5 => {
     if (p5.key === ' ' || p5.keyCode === p5.UP_ARROW) {
       if (STATE.isRunning) {
         STATE.dino.jump();
+        playJumpSound();
       } else {
         resetGame();
       }
