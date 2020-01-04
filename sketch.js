@@ -358,8 +358,9 @@ new P5(p5 => {
   p5.keyPressed = () => {
     if (p5.key === ' ' || p5.keyCode === p5.UP_ARROW) {
       if (STATE.isRunning) {
-        STATE.dino.jump();
-        playJumpSound();
+        if(STATE.dino.jump()){
+          playJumpSound();
+        }
       } else {
         resetGame();
       }
