@@ -275,12 +275,14 @@ new P5(p5 => {
   }
 
   function playJumpSound(){
-    if (jumpSound.isPlaying()) {
-      // .isPlaying() returns a boolean
-      jumpSound.stop();
-      jumpSound.play();
-    } else {
-      jumpSound.play();
+    if (!enableMicInput) {
+      if (jumpSound.isPlaying()) {
+        // .isPlaying() returns a boolean
+        jumpSound.stop();
+        jumpSound.play();
+      } else {
+        jumpSound.play();
+      }
     }
   }
 
