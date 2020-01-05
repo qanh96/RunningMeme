@@ -20,6 +20,7 @@ import Cactus from './lib/actors/Cactus.js';
 import Cloud from './lib/actors/Cloud.js';
 import config from './lib/config.js';
 import Dino from './lib/actors/Dino.js';
+import Jumper from './lib/actors/Jumper.js';
 import { randBoolean } from './lib/utils.js';
 
 const { p5: P5 } = window;
@@ -34,6 +35,7 @@ new P5(p5 => {
     birds: [],
     cacti: [],
     clouds: [],
+    jumpers: [],
     dino: null,
     gameOver: false,
     groundX: 0,
@@ -77,6 +79,7 @@ new P5(p5 => {
     Object.assign(STATE, {
       birds: [],
       cacti: [],
+      jumpers: [],
       dino: new Dino(p5.height),
       gameOver: false,
       isRunning: true,
@@ -247,6 +250,28 @@ new P5(p5 => {
     }
   }
 
+  function drawJumpers () { //copied from drawBirds with necessary changes
+    const { jumpers } = STATE;
+
+    for (let i = jumpers.length - 1; i >= 0; i--) {
+      const jumper = jumpers[i];
+
+      jumper.nextFrame();
+
+      if (jumper.x <= -jumper.width) {
+        jumpers.splice(i, 1);
+      } else {
+        spriteImage(jumper.sprite, jumper.x, jumper.y);
+      }
+    }
+
+    if (p5.frameCount % config.settings.birdSpawnRate === 0) {
+      if (randBoolean()) {
+        jumpers.push(new Jumper(p5.width, p5.height));
+      }
+    }
+  }
+
   function toogleMicInput() {
     if (micInputCheckbox.checked()) {
       console.log('enable Mic Input!');
@@ -337,12 +362,12 @@ new P5(p5 => {
     drawCacti();
     drawScore();
 
-
-    if (STATE.level > 2) {
+    if (STATE.level > 0) {
       drawBirds();
+      drawJumpers();
     }
 
-    if (STATE.dino && STATE.dino.hits([STATE.cacti[0], STATE.birds[0]])) {
+    if (STATE.dino && STATE.dino.hits([STATE.cacti[0], STATE.birds[0], STATE.jumpers[0]])) {
       STATE.gameOver = true;
     }
 
