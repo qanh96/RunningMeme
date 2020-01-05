@@ -275,7 +275,7 @@ new P5(p5 => {
   }
 
   function playJumpSound(){
-    if (jumpSound.isPlaying() && !enableMicInput) {
+    if (jumpSound.isPlaying()) {
       // .isPlaying() returns a boolean
       jumpSound.stop();
       jumpSound.play();
@@ -293,7 +293,7 @@ new P5(p5 => {
       let intervalBtwJumps = Date.now() - ts;
       if (vol > threshold && STATE.isRunning && intervalBtwJumps > 100) {
         STATE.dino.doubleJump();
-        playJumpSound();
+        // playJumpSound();
         ts = Date.now(); 
       }
     }
