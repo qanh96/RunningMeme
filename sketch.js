@@ -390,5 +390,15 @@ new P5(p5 => {
       STATE.dino.duck(false);
     }
   };
+
+  p5.touchStarted = () => {
+    if (STATE.isRunning) {
+      if(STATE.dino.jump()){
+        playJumpSound();
+      }
+    } else {
+      resetGame();
+    }
+  };
 });
 
