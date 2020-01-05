@@ -275,7 +275,7 @@ new P5(p5 => {
   }
 
   function playJumpSound(){
-    if (jumpSound.isPlaying()) {
+    if (jumpSound.isPlaying() && !enableMicInput) {
       // .isPlaying() returns a boolean
       jumpSound.stop();
       jumpSound.play();
