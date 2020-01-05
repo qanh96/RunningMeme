@@ -1,18 +1,3 @@
-// function setup() {
-//   // put setup code here
-//   createCanvas(640, 480);
-// }
-
-// function draw() {
-//   // put drawing code here
-//   if (mouseIsPressed) {
-//     fill(0);
-//   } else {
-//     fill(255);
-//   }
-//   ellipse(mouseX, mouseY, 80, 80);
-// }
-
 /* jslint esversion: 9 */
 
 import Bird from './lib/actors/Bird.js';
@@ -265,7 +250,7 @@ new P5(p5 => {
       }
     }
 
-    if (p5.frameCount % config.settings.birdSpawnRate === 0) {
+    if (p5.frameCount % config.settings.jumperSpawnRate === 0) {
       if (randBoolean()) {
         jumpers.push(new Jumper(p5.width, p5.height));
       }
@@ -340,7 +325,7 @@ new P5(p5 => {
     mic.start();
     ts = Date.now();
 
-    const canvas = p5.createCanvas(600, 150);
+    const canvas = p5.createCanvas(600, 160);
 
     STATE.groundY = p5.height - config.sprites.ground.h / 2;
     p5.noLoop();
@@ -362,8 +347,11 @@ new P5(p5 => {
     drawCacti();
     drawScore();
 
-    if (STATE.level > 0) {
+    if (STATE.level > 2) {
       drawBirds();
+    }
+
+    if (STATE.level > 4) {
       drawJumpers();
     }
 
