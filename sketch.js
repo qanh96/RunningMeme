@@ -184,7 +184,8 @@ new P5(p5 => {
       dino.nextFrame();
       spriteImage(dino.sprite, dino.x, dino.y);
     } else {
-      spriteImage('dino', 25, (p5.height - (config.sprites.dino.h / 2) - 4));
+      // spriteImage('dino', 25, (p5.height - (config.sprites.dino.h / 2) - 4));
+      spriteImage('m_dawei', 25, (p5.height - (config.sprites.dino.h / 2) - 4));
     }
   }
 
@@ -337,7 +338,7 @@ new P5(p5 => {
     drawScore();
 
 
-    if (STATE.level > 3) {
+    if (STATE.level > 2) {
       drawBirds();
     }
 
